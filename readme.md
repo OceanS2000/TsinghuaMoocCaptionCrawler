@@ -10,6 +10,16 @@ GitHub Repo: https://github.com/c7w/TsinghuaMoocCaptionCrawler
 
 Blog: https://c7w.tech/yuketang-caption-crawler/
 
+## 一点小小的改动
+
+上游的 API 发生一些变化，现在的域名是 `pro.yuketang.cn` （虽然之前的好像还能用）。可以观测到的是字幕 API 入口已经改变，虽然前端查询课程视频列表也是用了另一个新 API，但是之前的还能用，就懒得改了。`xtbz` 头的内容也发生了变化，如果沿用之前的 `cloud` 会提示
+
+```
+{'msg': '请购买该课程之后再学习', 'error_code': 80019, 'success': False}
+```
+
+非常迷惑。总而言之，现在 It works on my machine™️
+
 <!--more-->
 
 ## 爬取过程
