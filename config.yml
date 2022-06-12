@@ -1,7 +1,8 @@
 # Tsinghua MOOC Caption Crawler by c7w.
-# Configuration file last updated at 01/29/2022.
+# Modified by OceanS2000.
+#
+# classroom_id: an integer id as found in devtools
 
-course_id: -1
-user_id: "8N*******ZH"
+classroom_id: 30
 
 # Also don't forget to put your cookies into './cookies' !

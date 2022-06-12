@@ -1,5 +1,8 @@
 import requests
 
+class NotVideoException(Exception):
+    pass
+
 def getCookies(filename):
     f = open(filename)
     f.readline()
@@ -14,20 +17,21 @@ def getCookies(filename):
             result[entryGroup[0]] = entryGroup[1]
     return result
 
+cookies = getCookies('./cookies')
+
 def trim(str):
     return str.replace(" ", '')\
               .replace("\n", '')
 
-def get_course_info(cid, sid):
+def get_course_info(cid):
     
     video_list = []
     
-    url = f'''https://tsinghua.yuketang.cn/mooc-api/v1/lms/learn/course/chapter?cid={cid}&sign={sid}&term=latest&uv_id=2598'''
-    cookies = getCookies('./cookies')
+    url = f'''https://tsinghua.yuketang.cn/mooc-api/v1/lms/learn/course/chapter?cid={cid}&classroom_id={cid}&term=latest&uv_id=2598'''
     response = requests.get(url, headers={\
                             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36',
-                            'xtbz': 'cloud'},
-                            cookies = getCookies("./cookies"))
+                            'xtbz': 'ykt'},
+                            cookies = cookies)
     
     data = response.json()
     chapter_list = data['data']['course_chapter']
@@ -42,27 +46,26 @@ def get_course_info(cid, sid):
     
     return video_list
 
-def get_caption(cid, sid, vid):
-    url = f'''https://tsinghua.yuketang.cn/mooc-api/v1/lms/learn/leaf_info/{cid}/{vid}/?sign={sid}&term=latest&uv_id=2598'''
-    cookies = getCookies('./cookies')
+def get_caption(cid, vid):
+    url = f'''https://tsinghua.yuketang.cn/mooc-api/v1/lms/learn/leaf_info/{cid}/{vid}/?term=latest&uv_id=2598&classroom_id={cid}'''
     response = requests.get(url, headers={\
                             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36',
-                            'xtbz': 'cloud'},
-                            cookies = getCookies("./cookies"))
+                            'xtbz': 'ykt'},
+                            cookies = cookies)
     
     data = response.json()
     video_name = data['data']['name']
     
     try:
+        print(f"Try crawling: {video_name}")
         ccid = data['data']['content_info']['media']['ccid']
-        if not ccid: raise BaseException("HTML Introduction. No video.")
+        if not ccid: raise NotVideoException("HTML Introduction. No video.")
         
-        url = f'''https://tsinghua.yuketang.cn/mooc-api/v1/lms/service/subtitle_parse/?c_d={ccid}&lg=0'''
-        cookies = getCookies('./cookies')
+        url = f'''https://pro.yuketang.cn/api/open/yunpan/video/subtitle/parse?cc_id={ccid}&language=1'''
         response = requests.get(url, headers={\
                                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36',
-                                'xtbz': 'cloud'},
-                                cookies = getCookies("./cookies"))
+                                'xtbz': 'ykt'},
+                                cookies = cookies)
         
         data = response.json()
         data['start'] = [int(s) for s in data['start']]
@@ -75,5 +78,8 @@ def get_caption(cid, sid, vid):
         
         f.close()
         
-    except:
+    except NotVideoException:
         pass
+    except BaseException as e:
+        print(f"Unexpected exception {e=}, {type(e)=}")
+        raise
